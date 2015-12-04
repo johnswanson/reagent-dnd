@@ -59,14 +59,15 @@
 (defn drop-target-options [{:keys [drop can-drop?]
                             :or {drop (constantly nil)}}]
   (let [options #js{}]
-    (aset options "drop" (fn [props]
-                           (let [result (drop)]
+    (aset options "drop" (fn [props monitor]
+                           (let [result (drop (unserialize
+                                               (.getItem monitor)))]
                              (assert (serializable? result)
                                      (str "Not Serializable: " (pr-str result)))
                              (serialize result))))
     (when can-drop?
-      (aset options "canDrop" (fn [props]
-                                (can-drop?))))
+      (aset options "canDrop" (fn [props monitor]
+                                (can-drop? (.getItem monitor)))))
     options))
 
 (defn drop-target

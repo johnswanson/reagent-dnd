@@ -1,10 +1,15 @@
 (defproject reagent-dnd "0.1.0-SNAPSHOT"
   :dependencies [[org.clojure/clojure "1.7.0"]
-                 [org.clojure/clojurescript "1.7.145"]
+                 [org.clojure/clojurescript "1.7.170"]
                  [devcards "0.2.1"]
+                 [re-frame "0.4.1"]
                  [reagent "0.5.1"]
+                 [secretary "1.2.3"]
                  [cljsjs/react-dnd "2.0.2-0"]
-                 [cljsjs/react-dnd-html5-backend "2.0.0-0"]]
+                 [cljsjs/highlight "8.4-0"]
+                 [cljsjs/react-dnd-html5-backend "2.0.0-0"]
+                 [medley "0.7.0"]
+                 [markdown-clj "0.9.82"]]
 
   :source-paths ["src/clj" "src/cljs"]
 
@@ -12,8 +17,27 @@
             [lein-figwheel "0.5.0-1"]]
 
   :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
+  :figwheel {:css-dirs ["resources/public/css"]}
 
-  :cljsbuild {:builds [{:id           "tutorialdev"
+  :cljsbuild {:builds [{:id           "examples"
+                        :source-paths ["src/cljs" "examples"]
+                        :figwheel     {:on-jsload "examples.core/mount-root"}
+                        :compiler     {:main                 examples.core
+                                       :devcards             true
+                                       :asset-path           "js/compiled/examples"
+                                       :output-to            "resources/public/js/compiled/examples.js"
+                                       :output-dir           "resources/public/js/compiled/examples"
+                                       :source-map-timestamp true}}
+                       {:id           "tutorialbuild"
+                        :source-paths ["src/cljs"]
+                        :figwheel     {}
+                        :compiler     {:main                 "tutorial.core"
+                                       :devcards             true
+                                       :asset-path           "js/compiled/tutorial"
+                                       :output-to            "resources/public/js/compiled/tutorial.js"
+                                       :output-dir           "resources/public/js/compiled/tutorial"
+                                       :source-map-timestamp true}}
+                       {:id           "tutorialdev"
                         :source-paths ["src/cljs"]
                         :figwheel     {:devcards true}
                         :compiler     {:main                 "tutorial.core"
