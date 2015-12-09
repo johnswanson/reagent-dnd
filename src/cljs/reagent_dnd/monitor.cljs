@@ -6,7 +6,7 @@
    :can-drop?                      {:method "canDrop"}
    :over?                          {:method "isOver"}
    :shallow-over?                  {:method "isOver"
-                                    :args [#js{"shallow" true}]}
+                                    :args #js[#js{"shallow" true}]}
    :dragging?                      {:method "isDragging"}
    :item-type                      {:method "getItemType"
                                     :post-fn keyword}

@@ -50,10 +50,18 @@
 (defn nested-drag-sources [db]
   (reaction (:nested-drag-sources @(examples db))))
 
+(defn nested-drop-targets [db]
+  (reaction (:nested-drop-targets @(examples db))))
+
 (register-sub
  :nested-drag-source
  (fn [db [_ id]]
    (reaction (id @(nested-drag-sources db)))))
+
+(register-sub
+ :nested-drop-target
+ (fn [db [_ id]]
+   (reaction (id @(nested-drop-targets db)))))
 
 (register-sub
  :nested-drag-source-root

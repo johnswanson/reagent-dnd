@@ -21,7 +21,7 @@
 
 (defn safe-call
   "Call a javascript method safely (as a string)"
-  [obj method & args]
+  [obj method & [args]]
   (when-let [f (aget obj method)]
     (.apply f obj args)))
 

@@ -12,7 +12,8 @@
             [examples.views.stress-test]
             [examples.views.drag-around-naive]
             [examples.views.drag-around-custom]
-            [examples.views.nested-drag-sources]))
+            [examples.views.nested-drag-sources]
+            [examples.views.nested-drop-targets]))
 
 (defn link [page url]
   [:a {:href url} page])
@@ -128,7 +129,8 @@ use it with Reagent.
                  :naive [examples.views.drag-around-naive/view]
                  :custom [examples.views.drag-around-custom/view])
    :nested (array-map
-            :drag-sources [examples.views.nested-drag-sources/view])))
+            :drag-sources [examples.views.nested-drag-sources/view]
+            :drop-targets [examples.views.nested-drop-targets/view])))
 
 (defn examples-sidebar []
   [:div
