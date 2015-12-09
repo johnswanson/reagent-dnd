@@ -30,6 +30,10 @@
   (defroute "/tutorial" []
     (re-frame/dispatch [:set-viewing :tutorial]))
 
+  (defroute "/examples/:category/:id" {:keys [category id]}
+    (re-frame/dispatch [:set-viewing-examples [(keyword category)
+                                               (keyword id)]]))
+
   (defroute "/examples" []
     (re-frame/dispatch [:set-viewing :examples]))
 

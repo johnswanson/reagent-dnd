@@ -1,46 +1,18 @@
 (ns examples.views
-  (:require-macros [reagent.ratom :refer [reaction]]
-                   [devcards.system :as system]
-                   [devcards.core :as dc :refer [defcard-rg]])
-  (:require [re-frame.core :as re-frame :refer [subscribe dispatch]]
-            [cljs.pprint]
-            [examples.test]
+  (:require-macros [devcards.core :as dc])
+  (:require [re-frame.core :refer [subscribe dispatch]]
             [devcards.core :as dc]
             [devcards.util.edn-renderer]
-            [devcards.system :as system]
             [reagent.core :as r]
             [reagent-dnd.core :as dnd]
-            [markdown.core :refer [md->html]]
-            [reagent-dnd.core :as dnd]
             [reagent.ratom]
-            [cljsjs.highlight]
-            [cljsjs.highlight.langs.clojure]
-            [medley.core :refer [map-vals]]))
-
-(defn pprint [obj]
-  (with-out-str (cljs.pprint/pprint obj)))
-
-(defn show-state [state]
-  (devcards.util.edn-renderer/html-edn
-   (cond
-     (instance? PersistentVector state) (map deref state)
-     (instance? PersistentArrayMap state) (map-vals
-                                           deref
-                                           state)
-     (instance? reagent.ratom/RAtom state) @state
-     :default @state)))
-
-(defn highlight [thing]
-  (fn [thing]
-    [:pre
-     [:code
-      {:dangerouslySetInnerHTML
-       {:__html (.-value (.highlight js/hljs "clojure" thing))}}]]))
-
-(defn card [& {:keys [content state]}]
-  [:div.card
-   content
-   (show-state state)])
+            [examples.utils :refer [make-title make-url document card]]
+            [examples.views.single-target]
+            [examples.views.multiple-targets]
+            [examples.views.stress-test]
+            [examples.views.drag-around-naive]
+            [examples.views.drag-around-custom]
+            [examples.views.nested-drag-sources]))
 
 (defn link [page url]
   [:a {:href url} page])
@@ -73,11 +45,8 @@
   (fn []
     [dnd/drag-source
      :type       :knight
-     :end-drag   (fn [handled? result]
-                   (swap! state
-                          assoc
-                          :drag-result
-                          result))
+     :end-drag   (fn [state]
+                   (js/console.log "dropped on: " (clj->js (:drop-result state))))
      :child      [knight state]
      :begin-drag (fn [] {:id 1})
      :state      state]))
@@ -95,33 +64,19 @@
   (fn []
     [dnd/drop-target
      :types [:knight]
-     :drop (fn [data]
-             (swap! state assoc :last-dropped-item data)
+     :drop (fn [state]
+             (js/console.log "dropped item: " (clj->js (:item state)))
              {:id 5})
      :child [square state]
      :state state]))
 
-(defmulti show #(type %))
-(defmethod show js/String [s]
-  [:div {:dangerouslySetInnerHTML
-      {:__html (md->html s)}}])
-(defmethod show PersistentVector [s]
-  s)
-(defmethod show :default [s]
-  s)
 
-(defn document [& args]
-  [:div
-   (for [arg args]
-     ^{:key (pr-str arg)}
-     [:div {:style
-            {:margin "50px 0"}}
-      (show arg)])])
 
 (defn about-text [drag-state drop-state]
   (fn []
     (document
-    "# Reagent-dnd: Simple Drag & Drop for Reagent
+    "
+# Reagent-dnd: Simple Drag & Drop for Reagent
 Reagent-dnd is a set of [Reagent](https://reagent-project.github.io/) 
 components that help you create drag-and-drop
 interfaces that don't directly manipulate the DOM. It's a very thin wrapper 
@@ -147,6 +102,7 @@ use it with Reagent.
      [draggable drag-state]
      [droppable drop-state])))
 
+
 (defn about []
   (let [drag-state (r/atom {})
         drop-state (r/atom {})]
@@ -156,20 +112,57 @@ use it with Reagent.
        :state {:drag-state drag-state
                :drop-state drop-state}])))
 
+(defn link-to [category id]
+  (let [txt (make-title id)
+        url (make-url category id)]
+    [:a {:href url} txt]))
+
+
+(def examples-components
+  (array-map
+   :dustbin (array-map
+             :single-target [examples.views.single-target/view]
+             :multiple-targets [examples.views.multiple-targets/view]
+             :stress-test [examples.views.stress-test/view])
+   :drag-around (array-map
+                 :naive [examples.views.drag-around-naive/view]
+                 :custom [examples.views.drag-around-custom/view])
+   :nested (array-map
+            :drag-sources [examples.views.nested-drag-sources/view])))
+
+(defn examples-sidebar []
+  [:div
+   (for [[ex-name m] examples-components]
+     ^{:key (str "sidebar-example-" ex-name)}
+     [:div.sidebar-group
+      [:h4.sidebar-group (make-title ex-name)]
+      [:ul
+       (for [[id _] m]
+         ^{:key (str "sidebar-example-" id)}
+         [:li (link-to ex-name id)])]])])
+
 (defn api-docs []
   [:div "api docs"])
 
 (defn tutorial []
   [:div "Tutorial"])
 
+(defn examples-main []
+  (let [example (subscribe [:example])]
+    (fn []
+      (if-let [component (and @example (get-in examples-components @example))]
+        component
+        [examples.views.single-target/view]))))
+
 (defn examples []
-  [:div "Examples"])
+  [:div.grid
+   [:div.col-3 [examples-sidebar]]
+   [:div.col [examples-main]]])
 
 (defmulti panels identity)
 (defmethod panels :about []
-  [(dnd/with-drag-drop-context
-    dnd/html5-backend
-    about)])
+  [about])
+
 (defmethod panels :api-docs []
   [api-docs])
 (defmethod panels :tutorial []

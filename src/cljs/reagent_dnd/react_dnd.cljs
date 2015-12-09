@@ -17,6 +17,8 @@
 
 (def html5-backend js/ReactDnDHTML5Backend)
 
+(def get-empty-image (.getEmptyImage html5-backend))
+
 (defn with-drag-drop-context [backend]
   (fn [component]
     (r/adapt-react-class
