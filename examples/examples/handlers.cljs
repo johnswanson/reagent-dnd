@@ -77,3 +77,20 @@
  :toggle-greedy-drop-target
  (fn [db [_ id]]
    (update-in db [:examples :nested-drop-targets id :greedy?] not)))
+
+(re-frame/register-handler
+ :dropped-on-nested-drop-target
+ [re-frame/debug]
+ (fn [db [_ id & {:keys [dropped?]}]]
+   (js/console.log dropped?)
+   (let [greedy? (get-in db [:examples :nested-drop-targets id :greedy?])]
+     (if (and dropped? (not greedy?)) ;; handled already
+       db
+       (update-in db [:examples :nested-drop-targets id]
+                  assoc
+                  :dropped? true
+                  :dropped-on-child? dropped?)))))
+(re-frame/register-handler
+ :initialize-nested-drop-targets
+ (fn [db]
+   (assoc-in db [:examples :nested-drop-targets] nested-drop-targets-dummy)))

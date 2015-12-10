@@ -30,16 +30,29 @@
         [:input {:type :checkbox
                  :checked (:greedy? @target)
                  :on-change #(dispatch [:toggle-greedy-drop-target id])}]
-        "greedy"]
+        [:span "greedy"]
+        [:span (when (:dropped? @target)
+                 [:span " (Dropped)"])]
+        [:span (when (:dropped-on-child? @target)
+                 [:span " (on child) "])]]
        (for [child (:children @target)]
          ^{:key (name child)}
          [:div {:style {:margin-left "5px"}}
           [drop-target child]])])))
 
+(defn greedy? [id]
+  (:greedy? @(subscribe [:nested-drop-target id])))
+
 (defn drop-target [id]
   (let [state (r/atom {})]
     (fn [id]
       [dnd/drop-target
+       :drop
+       (fn [monitor]
+         (js/console.log (name id) (clj->js (select-keys monitor [:dropped?])))
+         (dispatch [:dropped-on-nested-drop-target id
+                    :dropped? (:dropped? monitor)])
+         true)
        :types [:box]
        :state state
        :child [drop-target-from-id state id]])))
@@ -47,8 +60,9 @@
 (defn box [state]
   [:div {:style {:border  "1px solid black"
                  :padding "1em"
-                 :opacity (if (:dragging? @state) 0.5 1)}}
-   [:span "Drag Me"]])
+                 :opacity (if (:dragging? @state) 0.5 1)}
+         :on-click #(dispatch [:initialize-nested-drop-targets])}
+   [:span "Drag Me (or click to clear)"]])
 
 (defn drag-source []
   (let [state (r/atom {})]

@@ -25,9 +25,12 @@
       (show arg)])])
 
 (defn card [& {:keys [content state]}]
-  [:div.card
-   content
-   (show-state state)])
+  [:div {:style {:display :flex}}
+   [:div {:flex "0 1 auto"}
+    [:div.card content]]
+   [:div {:flex      "0 1 auto"
+          :font-size "x-small"}
+    (show-state state)]])
 
 (defmulti show #(type %))
 (defmethod show js/String [s]
