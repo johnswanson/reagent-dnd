@@ -19,7 +19,14 @@
   :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
   :figwheel {:css-dirs ["resources/public/css"]}
 
-  :cljsbuild {:builds [{:id           "examples"
+  :cljsbuild {:builds [{:id           "examplesprod"
+                        :source-paths ["src/cljs" "examples"]
+                        :compiler     {:main          examples.core
+                                       :devcards      true
+                                       :asset-path    "js/compiled/examples"
+                                       :output-to     "resources/public/js/compiled/examples.js"
+                                       :optimizations :advanced}}
+                       {:id           "examples"
                         :source-paths ["src/cljs" "examples"]
                         :figwheel     {:on-jsload "examples.core/mount-root"}
                         :compiler     {:main                 examples.core
@@ -27,24 +34,6 @@
                                        :asset-path           "js/compiled/examples"
                                        :output-to            "resources/public/js/compiled/examples.js"
                                        :output-dir           "resources/public/js/compiled/examples"
-                                       :source-map-timestamp true}}
-                       {:id           "tutorialbuild"
-                        :source-paths ["src/cljs"]
-                        :figwheel     {}
-                        :compiler     {:main                 "tutorial.core"
-                                       :devcards             true
-                                       :asset-path           "js/compiled/tutorial"
-                                       :output-to            "resources/public/js/compiled/tutorial.js"
-                                       :output-dir           "resources/public/js/compiled/tutorial"
-                                       :source-map-timestamp true}}
-                       {:id           "tutorialdev"
-                        :source-paths ["src/cljs"]
-                        :figwheel     {:devcards true}
-                        :compiler     {:main                 "tutorial.core"
-                                       :devcards             true
-                                       :asset-path           "js/compiled/tutorial"
-                                       :output-to            "resources/public/js/compiled/tutorial.js"
-                                       :output-dir           "resources/public/js/compiled/tutorial"
                                        :source-map-timestamp true}}
                        {:id           "tutorialprod"
                         :source-paths ["src/cljs"]
