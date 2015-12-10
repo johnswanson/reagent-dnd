@@ -49,7 +49,6 @@
       [dnd/drop-target
        :drop
        (fn [monitor]
-         (js/console.log (name id) (clj->js (select-keys monitor [:dropped?])))
          (dispatch [:dropped-on-nested-drop-target id
                     :dropped? (:dropped? monitor)])
          true)
